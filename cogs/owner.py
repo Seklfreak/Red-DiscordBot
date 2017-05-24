@@ -531,8 +531,9 @@ class Owner:
 
 
         is_music_mod = discord.utils.get(ctx.message.author.roles, name=self.bot.settings.get_server_musicmod(ctx.message.server)) is not None
+        is_mod_or_permissions = checks.mod_or_permissions(administrator=True) is not None
 
-        if checks.mod_or_permissions(administrator=True) or is_music_mod:
+        if is_mod_or_permissions or is_music_mod:
             try:
                 if not silently:
                     await self.bot.say("Restarting...")
