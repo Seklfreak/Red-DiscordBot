@@ -22,6 +22,7 @@ class Settings:
             "default": {"ADMIN_ROLE": "Admin",
                         "MOD_ROLE": "Mod",
                         "SUBMOD_ROLE": "Mod Trainee",
+                        "MUSIC_MOD_ROLE": "Music God",
                         "PREFIXES": []}
                         }
         self._memory_only = False
@@ -59,6 +60,7 @@ class Settings:
                                                  "Red")
         parser.add_argument("--mod-role", help="Role seen as mod role by Red")
         parser.add_argument("--submod-role", help="Role seen as sub mod role by Red")
+        parser.add_argument("--musicmod-role", help="Role seen as music mod role by Red")
         parser.add_argument("--no-prompt",
                             action="store_true",
                             help="Disables console inputs. Features requiring "
@@ -95,6 +97,8 @@ class Settings:
             self.default_mod = args.mod_role
         if args.submod_role:
             self.default_mod = args.submod_role
+        if args.musicmod_role:
+            self.default_mod = args.musicmod_role
 
         self.no_prompt = args.no_prompt
         self.self_bot = args.self_bot
@@ -234,6 +238,18 @@ class Settings:
         self.bot_settings["default"]["SUBMOD_ROLE"] = value
 
     @property
+    def default_musicmod(self):
+        if "default" not in self.bot_settings:
+            self.update_old_settings_v1()
+        return self.bot_settings["default"].get("MUSICMOD_ROLE", "")
+
+    @default_musicmod.setter
+    def default_musicmod(self, value):
+        if "default" not in self.bot_settings:
+            self.update_old_settings_v1()
+        self.bot_settings["default"]["MUSICMOD_ROLE"] = value
+
+    @property
     def servers(self):
         ret = {}
         server_ids = list(
@@ -305,6 +321,23 @@ class Settings:
         if server.id not in self.bot_settings:
             self.add_server(server.id)
         self.bot_settings[server.id]["SUBMOD_ROLE"] = value
+        self.save_settings()
+
+    def get_server_musicmod(self, server):
+        if server is None:
+            return self.default_musicmod
+        assert isinstance(server, discord.Server)
+        if server.id not in self.bot_settings:
+            return self.default_musicmod
+        return self.bot_settings[server.id].get("MUSICMOD_ROLE", "")
+
+    def set_server_musicmod(self, server, value):
+        if server is None:
+            return
+        assert isinstance(server, discord.Server)
+        if server.id not in self.bot_settings:
+            self.add_server(server.id)
+        self.bot_settings[server.id]["MUSICMOD_ROLE"] = value
         self.save_settings()
 
     def get_server_prefixes(self, server):

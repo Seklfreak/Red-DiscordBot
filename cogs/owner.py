@@ -521,20 +521,24 @@ class Owner:
             pass
         await self.bot.shutdown()
 
-    @commands.command()
-    @checks.is_owner()
-    async def restart(self, silently : bool=False):
+    @commands.command(pass_context=True,)
+    async def restart(self, ctx, silently : bool=False):
         """Attempts to restart Red
 
         Makes Red quit with exit code 26
         The restart is not guaranteed: it must be dealt
         with by the process manager in use"""
-        try:
-            if not silently:
-                await self.bot.say("Restarting...")
-        except:
-            pass
-        await self.bot.shutdown(restart=True)
+
+
+        is_music_mod = discord.utils.get(ctx.message.author.roles, name=self.bot.settings.get_server_musicmod(ctx.message.server)) is not None
+
+        if checks.mod_or_permissions(administrator=True) or is_music_mod:
+            try:
+                if not silently:
+                    await self.bot.say("Restarting...")
+            except:
+                pass
+            await self.bot.shutdown(restart=True)
 
     @commands.group(name="command", pass_context=True)
     @checks.is_owner()
